@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <!-- This document forms the dockable panel. The button is the <input> tag below. The <style> formats the button. 
 
-        The extendscript is called through the <script type="text/javascript"> tag, which then routes it to use the adobe_cep_.evalScript to interpret that Javascript into Extendscript -->
+		The extendscript is called through the <script type="text/javascript"> tag, which then routes it to use the adobe_cep_.evalScript to interpret that Javascript into Extendscript -->
 <html>
-<head>
-    <meta charset="utf-8">
-    <title>CapsPanel</title>
-    <script src="./lib/CSInterface.js"></script>
-    <style>
+	<head>
+		<meta charset="utf-8">
+		<title>CapsPanel</title>
+		<script src="./lib/CSInterface.js"></script>		
+		<style>
         @import url('https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap');
-        body {
+			body {
             background: #1a1a1a;
             color: #e3e6ea;
             font-family: 'Roboto', Arial, sans-serif;
-            text-align: center;
+				text-align: center;
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -46,7 +46,7 @@
             font-size: 15px;
             color: #b0b8c1;
             margin-bottom: 6px;
-            display: block;
+				display: block;
         }
         .info {
             display: inline-block;
@@ -379,12 +379,12 @@
                 min-width: unset;
             }
         }
-    </style>
-</head>
-<body>
+		</style>
+	</head>
+	<body>
     <div class="panel-container" style="position:relative;">
         <button class="help-btn" id="helpBtn" title="Help">&#9432; Help</button>
-        <h2>Captions Creator for Premiere Pro</h2>
+		<h2>Captions Creator for Premiere Pro</h2>
         <form id="subtitleForm" autocomplete="off" onsubmit="return false;">
             <div class="input-group">
                 <label for="scriptFileInput">
@@ -394,7 +394,7 @@
                     </span>
                 </label>
                 <div class="custom-file-input-wrapper">
-                    <input type="file" id="scriptFileInput" accept=".txt" />
+		<input type="file" id="scriptFileInput" accept=".txt" />
                     <button type="button" id="customFileButton" tabindex="0">Choose File</button>
                     <span id="customFileName">No file chosen</span>
                 </div>
@@ -410,11 +410,35 @@
                     <input type="range" id="wordSpacingSlider" min="0" max="15" value="0" step="0.1">
                     <input type="number" id="wordSpacingInput" min="0" max="15" value="0" step="0.1">
                 </div>
+		</div>
+            <div class="input-group">
+                <label>Timing Mode</label>
+                <div id="timingModeGroup" style="display: flex; gap: 18px; align-items: center; margin-bottom: 8px;">
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="radio" name="timingMode" value="auto" id="timingAuto" checked>
+                        Automatic
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="radio" name="timingMode" value="manual" id="timingManual">
+                        Manual
+                    </label>
+                </div>
+                <div id="manualTimingFields" style="display: none; flex-direction: column; gap: 6px; margin-bottom: 0;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label for="startTimeInput" style="margin-bottom:0;">Start Time (HH:MM:SS):</label>
+                        <input type="text" id="startTimeInput" placeholder="00:00:00" maxlength="12" style="width:90px;">
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label for="endTimeInput" style="margin-bottom:0;">End Time (HH:MM:SS):</label>
+                        <input type="text" id="endTimeInput" placeholder="00:01:00" maxlength="12" style="width:90px;">
+                    </div>
+                </div>
             </div>
+            <div id="durationDisplay" style="margin: 8px 0 0 0; font-size: 15px; color: #b0b8c1; min-height: 22px;"></div>
             <hr class="divider" />
             <button id="runButton" type="button" title="Generate subtitle track in Premiere Pro from your text file.">Create Subtitles</button>
         </form>
-        <div id="status"></div>
+		<div id="status"></div>
     </div>
     <!-- Help Modal (hidden by default) -->
     <div id="helpModalBackdrop" class="help-modal-backdrop" style="display:none;">
@@ -441,44 +465,79 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript">
-        // Word spacing slider and input handling
-        var slider = document.getElementById('wordSpacingSlider');
-        var input = document.getElementById('wordSpacingInput');
-        var valueLabel = document.getElementById('wordSpacingValue');
-        slider.oninput = function() {
-            input.value = slider.value;
-            valueLabel.textContent = slider.value;
-        };
-        input.oninput = function() {
-            slider.value = input.value;
-            valueLabel.textContent = input.value;
-        };
-        document.getElementById('runButton').onclick = function() {
-            var fileInput = document.getElementById('scriptFileInput');
-            var statusDiv = document.getElementById('status');
-            statusDiv.className = '';
-            if (!fileInput.files || fileInput.files.length === 0) {
-                statusDiv.textContent = 'Please select a .txt file.';
-                statusDiv.className = 'error';
-                return;
+		<script type="text/javascript">
+			// Word spacing slider and input handling
+			var slider = document.getElementById('wordSpacingSlider');
+			var input = document.getElementById('wordSpacingInput');
+			var valueLabel = document.getElementById('wordSpacingValue');
+			slider.oninput = function() {
+				input.value = slider.value;
+				valueLabel.textContent = slider.value;
+			};
+			input.oninput = function() {
+				slider.value = input.value;
+				valueLabel.textContent = input.value;
+			};
+			// Timing mode logic
+			var timingAuto = document.getElementById('timingAuto');
+			var timingManual = document.getElementById('timingManual');
+			var manualTimingFields = document.getElementById('manualTimingFields');
+			function updateTimingFieldsVisibility() {
+            if (timingManual.checked) {
+                manualTimingFields.style.display = 'flex';
+            } else {
+                manualTimingFields.style.display = 'none';
             }
-            var file = fileInput.files[0];
-            var filePath = file.path || file.webkitRelativePath || file.name;
-            if (!filePath) {
-                statusDiv.textContent = 'Could not get file path.';
-                statusDiv.className = 'error';
-                return;
-            }
-            var wordSpacing = parseFloat(input.value);
-            if (isNaN(wordSpacing) || wordSpacing < 0) wordSpacing = 0;
-            if (wordSpacing > 15) wordSpacing = 15;
-            var cs = new CSInterface();
-            var safePath = filePath.replace(/\\/g, "\\\\");
-            cs.evalScript('$.runScript.createSubtitlesFromFile("' + safePath + '", ' + wordSpacing + ')');
-            statusDiv.textContent = 'Subtitle creation triggered. Check Premiere Pro event panel for status.';
-            statusDiv.className = 'success';
-        };
+        }
+			timingAuto.onchange = timingManual.onchange = function() {
+				updateTimingFieldsVisibility();
+				updateDurationDisplay();
+			};
+			// On load, ensure correct visibility
+			updateTimingFieldsVisibility();
+			document.getElementById('runButton').onclick = function() {
+				var fileInput = document.getElementById('scriptFileInput');
+				var statusDiv = document.getElementById('status');
+				statusDiv.className = '';
+				// File validation
+				if (!fileInput.files || fileInput.files.length === 0) {
+					statusDiv.textContent = 'Please select a .txt file.';
+					statusDiv.className = 'error';
+					return;
+				}
+				var file = fileInput.files[0];
+				var filePath = file.path || file.webkitRelativePath || file.name;
+				if (!filePath) {
+					statusDiv.textContent = 'Could not get file path.';
+					statusDiv.className = 'error';
+					return;
+				}
+				// Word spacing validation
+				var wordSpacing = parseFloat(input.value);
+				if (isNaN(wordSpacing) || wordSpacing < 0) wordSpacing = 0;
+				if (wordSpacing > 15) wordSpacing = 15;
+				// Timing mode
+				var timingMode = timingManual.checked ? 'manual' : 'auto';
+				var startTime = '', endTime = '';
+				if (timingMode === 'manual') {
+					startTime = document.getElementById('startTimeInput').value.trim();
+					endTime = document.getElementById('endTimeInput').value.trim();
+					// Basic format validation
+					var timeRegex = /^\d{2}:\d{2}:\d{2}$/;
+					if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+						statusDiv.textContent = 'Please enter valid start and end times (HH:MM:SS).';
+						statusDiv.className = 'error';
+						return;
+					}
+				}
+				var cs = new CSInterface();
+				var safePath = filePath.replace(/\\/g, "\\\\");
+				cs.evalScript('$.runScript.createSubtitlesFromFile("' + safePath + '", ' + wordSpacing + ', "' + timingMode + '", "' + startTime + '", "' + endTime + '")', function(result) {
+					// The ExtendScript will set the event panel message; we can optionally parse result for more feedback
+				});
+				statusDiv.textContent = 'Subtitle creation triggered. Check Premiere Pro event panel for status.';
+				statusDiv.className = 'success';
+			};
         // Custom file input logic
         var realFileInput = document.getElementById('scriptFileInput');
         var customFileButton = document.getElementById('customFileButton');
@@ -499,6 +558,36 @@
             }
         };
         // No custom number input arrow logic needed; use native input
+        // Duration display logic
+        var durationDisplay = document.getElementById('durationDisplay');
+        function secondsToHMS(sec) {
+            sec = Math.max(0, Math.floor(sec));
+            var h = Math.floor(sec / 3600);
+            var m = Math.floor((sec % 3600) / 60);
+            var s = sec % 60;
+            return (h > 0 ? (h < 10 ? '0' : '') + h + ':' : '') + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+        function updateDurationDisplay() {
+            if (timingManual.checked) {
+                durationDisplay.textContent = '';
+                durationDisplay.style.display = 'none';
+            } else {
+                durationDisplay.style.display = '';
+                durationDisplay.textContent = 'Fetching duration...';
+                var cs = new CSInterface();
+                cs.evalScript('$.runScript.getVideoDuration()', function(result) {
+                    var dur = parseFloat(result);
+                    if (!isNaN(dur) && dur > 0) {
+                        durationDisplay.textContent = 'Duration: ' + Math.floor(dur) + ' seconds (' + secondsToHMS(dur) + ')';
+                    } else {
+                        durationDisplay.textContent = 'Duration: --';
+                    }
+                });
+            }
+        }
+        // Update duration on mode change and input
+        // Initial call
+        updateDurationDisplay();
         // Help modal logic
         var helpBtn = document.getElementById('helpBtn');
         var helpModalBackdrop = document.getElementById('helpModalBackdrop');
@@ -519,6 +608,6 @@
                 helpModalBackdrop.style.display = 'none';
             }
         });
-    </script>
-</body>
+		</script>
+	</body>
 </html>

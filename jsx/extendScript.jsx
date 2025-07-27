@@ -89,7 +89,7 @@ function toSRTTime(timeInSeconds) {
     return pad(hours, 2) + ":" + pad(minutes, 2) + ":" + pad(seconds, 2) + "," + pad(milliseconds, 3);
 }
 
-function createSubtitlesFromFile(filePath, wordSpacing, totalDuration) {
+function createSubtitlesFromFile(filePath, wordSpacing, totalDuration, startTimeOffset) {
     // Utility: get correct file path separator
     function getSep() {
         if (Folder.fs === 'Macintosh') {
@@ -190,7 +190,7 @@ function createSubtitlesFromFile(filePath, wordSpacing, totalDuration) {
 
     // Now build the SRT with proportional durations
     var srtContent = "";
-    var startTime = 0;
+    var startTime = (typeof startTimeOffset === 'number' && !isNaN(startTimeOffset)) ? startTimeOffset : 0;
     var captionIndex = 1;
     for (var i = 0; i < validLines.length; i++) {
         var line = validLines[i];
@@ -262,13 +262,40 @@ if (!$.runScript) $.runScript = {};
 $.runScript.getVideoDuration = getVideoDuration;
 
 // Expose createSubtitlesFromFile for panel
-$.runScript.createSubtitlesFromFile = function(filePath, wordSpacing) {
-    var duration = getVideoDuration();
-    if (!duration || duration <= 0) {
-        app.setSDKEventMessage("Could not determine video duration. Please make sure your sequence has content.", 'error');
-        return;
+$.runScript.createSubtitlesFromFile = function(filePath, wordSpacing, timingMode, startTimeStr, endTimeStr) {
+    function parseTimeToSeconds(timeStr) {
+        if (!timeStr || timeStr === "") return null;
+        timeStr = timeStr.replace(/^\s+|\s+$/g, "");
+        var regex = /^(\d{1,2}):(\d{1,2}):(\d{1,2})(?:[\.,](\d{1,3}))?$/;
+        var match = timeStr.match(regex);
+        if (!match) return null;
+        var h = parseInt(match[1], 10), m = parseInt(match[2], 10), s = parseInt(match[3], 10), ms = match[4] ? parseInt(match[4], 10) : 0;
+        if (h < 0 || m < 0 || m >= 60 || s < 0 || s >= 60) return null;
+        var total = h * 3600 + m * 60 + s + (ms / 1000);
+        return isNaN(total) || total < 0 ? null : total;
     }
-    // Only alert the user about the video duration
-    alert("Detected video duration: " + duration.toFixed(2) + " seconds");
-    createSubtitlesFromFile(filePath, wordSpacing, duration);
+    var totalDuration = 0, startTime = 0;
+    if (timingMode === 'manual') {
+        var startTimeVal = parseTimeToSeconds(startTimeStr);
+        var endTimeVal = parseTimeToSeconds(endTimeStr);
+        if (startTimeVal === null || endTimeVal === null) {
+            app.setSDKEventMessage("Invalid start or end time format. Please use HH:MM:SS.", 'error');
+            return;
+        }
+        if (endTimeVal <= startTimeVal) {
+            app.setSDKEventMessage("End time must be after start time.", 'error');
+            return;
+        }
+        totalDuration = endTimeVal - startTimeVal;
+        startTime = startTimeVal;
+        createSubtitlesFromFile(filePath, wordSpacing, totalDuration, startTime);
+    } else {
+        totalDuration = getVideoDuration();
+        if (!totalDuration || totalDuration <= 0) {
+            app.setSDKEventMessage("Could not determine video duration. Please make sure your sequence has content.", 'error');
+            return;
+        }
+        startTime = 0;
+        createSubtitlesFromFile(filePath, wordSpacing, totalDuration, startTime);
+    }
 };
