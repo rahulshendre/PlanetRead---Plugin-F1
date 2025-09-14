@@ -36,7 +36,7 @@ This guide covers the complete development process for creating Adobe Premiere P
 
 ## Development Environment Setup
 
-For detailed installation guide, please follow: **[Installation Guide](https://github.com/PlanetRead/subtitle-tool-for-Adobe-Premier/blob/rahul_featureOne/INSTALLATION.md)**
+For detailed installation guide, please follow: **[Installation Guide](https://github.com/PlanetRead/subtitle-tool-for-Adobe-Premier/blob/rahul_featureOne/Installation.md)**
 
 ### Step 1: Enable Unsigned Extensions
 
