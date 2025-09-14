@@ -23,7 +23,7 @@ This guide covers the complete development process for creating Adobe Premiere P
 ## Prerequisites
 
 ### Required Software
-- **Adobe Premiere Pro** (version 11.1 or later for CEP 7.0)
+- **Adobe Premiere Pro** (recent version with CEP support)
 - **Creative Cloud** subscription
 - **Text Editor** (Sublime Text, VS Code, or similar)
 - **Web Browser** (for testing HTML/CSS/JavaScript)
@@ -42,20 +42,21 @@ Before any extension can load in Premiere Pro, you must enable the loading of un
 
 #### For Windows:
 1. Open **Registry Editor** (`regedit`)
-2. Navigate to: `HKEY_CURRENT_USER\Software\Adobe\CSXS.7`
+2. Navigate to: `HKEY_CURRENT_USER\Software\Adobe\CSXS.X` (where X is your CEP version)
 3. Create a new **String Value** named `PlayerDebugMode`
 4. Set the value to `1`
 
 #### For Mac:
 1. Open **Terminal**
-2. Run the following command (replace `username` with your actual username):
+2. Run the following command (replace `username` with your actual username and X with your CEP version):
 ```bash
-defaults write /Users/username/Library/Preferences/com.adobe.CSXS.7.plist PlayerDebugMode 1
+defaults write /Users/username/Library/Preferences/com.adobe.CSXS.X.plist PlayerDebugMode 1
 ```
 
-#### For Older Premiere Versions (Pre-11.1):
-- Use `CSXS.6` instead of `CSXS.7` in the above instructions
-- This enables CEP 6.0 compatibility
+#### CEP Version Notes:
+- Check your Premiere Pro version to determine the correct CSXS version number
+- Common versions: CSXS.6, CSXS.7, CSXS.8, etc.
+- This enables unsigned extension loading for development
 
 ### Step 2: Extension Directory Setup
 
@@ -114,7 +115,7 @@ This template includes:
 
 - **ExtensionBundleId**: Must be unique across all extensions
 - **Host Version**: Must match your Premiere Pro version
-- **CSXS Version**: Use 7.0 for Premiere 11.1+, 6.0 for older versions
+- **CSXS Version**: Must match your CEP version (check your Premiere Pro version)
 - **MainPath**: Points to your HTML file
 - **ScriptPath**: Points to your ExtendScript file
 - **Menu**: The name that appears in Premiere's Extensions menu
@@ -296,7 +297,7 @@ This workflow allows you to develop and test the core Premiere Pro automation lo
 - Check manifest.xml syntax
 - Verify file paths are correct
 - Ensure PlayerDebugMode is enabled
-- Check Premiere Pro version compatibility
+- Check CEP version compatibility with your Premiere Pro version
 
 #### ExtendScript Errors
 - Verify active sequence exists
@@ -354,7 +355,7 @@ This workflow allows you to develop and test the core Premiere Pro automation lo
 
 ### Premiere Pro Integration
 - Check for active sequence before operations
-- Handle different Premiere Pro versions
+- Handle different Premiere Pro versions and CEP versions
 - Use appropriate error messages
 - Respect Premiere Pro's undo system
 
@@ -384,7 +385,7 @@ For detailed code examples and implementation patterns, refer to the [Adobe CEP 
 Developing Adobe Premiere Pro extensions requires understanding both web technologies and Adobe's ExtendScript environment. Start with simple extensions and gradually add complexity. Always test thoroughly and provide good user feedback. The CEP framework provides powerful capabilities for automating Premiere Pro workflows and creating custom tools for video production.
 
 Remember to:
-- Keep your extensions updated with Premiere Pro versions
+- Keep your extensions updated with current Premiere Pro and CEP versions
 - Test on different operating systems
 - Provide clear documentation for users
 - Handle errors gracefully
