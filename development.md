@@ -163,8 +163,7 @@ This file is included in the [Adobe CEP Samples repository](https://github.com/A
 
 ### Overview
 
-For rapid prototyping and testing of ExtendScript code without creating a full extension, you can use the **ExtendScript Debugger**. This allows you to write and run standalone .jsx scripts directly in Premiere Pro using alert boxes and prompts for user interaction. [dowload from here]([url](https://marketplace.visualstudio.com/items?itemName=Adobe.extendscript-debug))
-
+For rapid prototyping and testing of ExtendScript code without creating a full extension, you can use the **ExtendScript Debugger**. This allows you to write and run standalone .jsx scripts directly in Premiere Pro using alert boxes and prompts for user interaction. [here](https://marketplace.visualstudio.com/items?itemName=Adobe.extendscript-debug)
 ### Installing ExtendScript Debugger
 
 1. Download the ExtendScript Debugger extension.
